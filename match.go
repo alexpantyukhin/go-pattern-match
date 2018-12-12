@@ -7,13 +7,14 @@ import (
 type MatchKey int
 
 type matchItem struct {
-	value  interface{}
-	action func() interface{}
+	pattern interface{}
+	action  func() interface{}
 }
 
 const (
 	ANY  MatchKey = 0
-	TAIL MatchKey = 1
+	HEAD MatchKey = 1
+	TAIL MatchKey = 2
 )
 
 // Matcher struct
@@ -48,10 +49,18 @@ func (matcher *Matcher) Result() interface{} {
 	valueIsSimpleType := contains(simpleTypes, valueKind)
 
 	for _, mi := range matcher.matchItems {
-		if (valueIsSimpleType) && matcher.value == mi.value {
+		if (valueIsSimpleType) && matcher.value == mi.pattern {
 			return mi.action()
 		}
 
+		miKind := reflect.TypeOf(mi.pattern).Kind()
+
+		if valueKind == reflect.Slice &&
+			miKind == reflect.Slice &&
+			matchSlice(mi.pattern, matcher.value) {
+
+			return mi.action()
+		}
 	}
 
 	return nil
@@ -59,8 +68,72 @@ func (matcher *Matcher) Result() interface{} {
 
 // todo: implement
 func matchSlice(pattern interface{}, value interface{}) bool {
+	patternSlice := reflect.ValueOf(pattern)
+	valueSlice := reflect.ValueOf(value)
+
+	patternSliceLength := patternSlice.Len()
+	valueSliceLength := valueSlice.Len()
+
+	patternSliceMaxIndex := patternSliceLength - 1
+	valueSliceMaxIndex := valueSliceLength - 1
+
+	if patternSliceLength == 0 || valueSliceLength == 0 {
+		if patternSliceLength == valueSliceLength {
+			return true
+		}
+		return false
+	}
+
+	for i := 0; i < max(patternSliceMaxIndex, valueSliceMaxIndex)+1; i++ {
+		currPatternIndex := min(i, patternSliceMaxIndex)
+		currValueIndex := min(i, valueSliceMaxIndex)
+
+		var currPattern interface{}
+		if patternSliceLength > 0 {
+			currPattern = patternSlice.Index(currPatternIndex).Interface()
+		}
+
+		var currValue interface{}
+		if valueSliceLength > 0 {
+			currValue = valueSlice.Index(currValueIndex).Interface()
+		}
+
+		if currPattern == HEAD {
+			if i != 0 {
+				panic("HEAD can only be in first position of a pattern.")
+			} else {
+				if i > valueSliceMaxIndex {
+					return false
+				}
+			}
+		} else if currPattern == TAIL {
+			if patternSliceMaxIndex > i {
+				panic("TAIL must me in last position of the pattern.")
+			} else {
+				break
+			}
+		} else {
+			if currPattern != currValue {
+				return false
+			}
+		}
+	}
 
 	return true
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
 }
 
 func contains(vals []reflect.Kind, val reflect.Kind) bool {
