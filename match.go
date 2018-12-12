@@ -74,9 +74,6 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 	patternSliceLength := patternSlice.Len()
 	valueSliceLength := valueSlice.Len()
 
-	patternSliceMaxIndex := patternSliceLength - 1
-	valueSliceMaxIndex := valueSliceLength - 1
-
 	if patternSliceLength == 0 || valueSliceLength == 0 {
 		if patternSliceLength == valueSliceLength {
 			return true
@@ -84,19 +81,15 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 		return false
 	}
 
-	for i := 0; i < max(patternSliceMaxIndex, valueSliceMaxIndex)+1; i++ {
+	patternSliceMaxIndex := patternSliceLength - 1
+	valueSliceMaxIndex := valueSliceLength - 1
+
+	for i := 0; i < max(patternSliceLength, valueSliceLength); i++ {
 		currPatternIndex := min(i, patternSliceMaxIndex)
 		currValueIndex := min(i, valueSliceMaxIndex)
 
-		var currPattern interface{}
-		if patternSliceLength > 0 {
-			currPattern = patternSlice.Index(currPatternIndex).Interface()
-		}
-
-		var currValue interface{}
-		if valueSliceLength > 0 {
-			currValue = valueSlice.Index(currValueIndex).Interface()
-		}
+		currPattern := patternSlice.Index(currPatternIndex).Interface()
+		currValue := valueSlice.Index(currValueIndex).Interface()
 
 		if currPattern == HEAD {
 			if i != 0 {
