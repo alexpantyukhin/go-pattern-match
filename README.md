@@ -4,7 +4,7 @@ For now the following matching are implemented :
    - [x] Simple types (like int, int64, float, float64, bool..).
    - [x] Slices (with HEAD, TAIL patterns).
    - [x] Dictionary (with ANY pattern).
-   - [ ] Regexp.
+   - [x] Regexp.
    - [ ] Adding custom matching (ability to add special matching for some structs for example)
 
 # Installation

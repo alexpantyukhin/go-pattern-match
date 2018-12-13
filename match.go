@@ -2,6 +2,7 @@ package match
 
 import (
 	"reflect"
+	"regexp"
 )
 
 type MatchKey int
@@ -67,6 +68,17 @@ func (matcher *Matcher) Result() interface{} {
 			matchMap(mi.pattern, matcher.value) {
 
 			return mi.action()
+		}
+
+		if valueKind == reflect.String {
+			if miKind == reflect.String {
+				return mi.pattern == matcher.value
+			}
+
+			reg, ok := mi.pattern.(*regexp.Regexp)
+			if ok {
+				return matchRegexp(reg, matcher.value)
+			}
 		}
 	}
 
@@ -163,6 +175,12 @@ func matchMap(pattern interface{}, value interface{}) bool {
 	}
 
 	return true
+}
+
+func matchRegexp(regexp *regexp.Regexp, value interface{}) bool {
+	valueStr := value.(string)
+
+	return regexp.MatchString(valueStr)
 }
 
 func min(a, b int) int {
