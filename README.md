@@ -3,7 +3,7 @@ It's just another approach for using pattern matching in Go.
 For now the following matching are implemented :
    - [x] Simple types (like int, int64, float, float64, bool..).
    - [x] Slices (with HEAD, TAIL patterns).
-   - [ ] Dictionary (with ANY pattern).
+   - [x] Dictionary (with ANY pattern).
    - [ ] Regexp.
    - [ ] Adding custom matching (ability to add special matching for some structs for example)
 

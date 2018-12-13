@@ -46,7 +46,7 @@ func (matcher *Matcher) Result() interface{} {
 	}
 
 	valueKind := reflect.TypeOf(matcher.value).Kind()
-	valueIsSimpleType := contains(simpleTypes, valueKind)
+	valueIsSimpleType := containsKind(simpleTypes, valueKind)
 
 	for _, mi := range matcher.matchItems {
 		if (valueIsSimpleType) && matcher.value == mi.pattern {
@@ -58,6 +58,13 @@ func (matcher *Matcher) Result() interface{} {
 		if valueKind == reflect.Slice &&
 			miKind == reflect.Slice &&
 			matchSlice(mi.pattern, matcher.value) {
+
+			return mi.action()
+		}
+
+		if valueKind == reflect.Map &&
+			miKind == reflect.Map &&
+			matchMap(mi.pattern, matcher.value) {
 
 			return mi.action()
 		}
@@ -106,9 +113,52 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 				break
 			}
 		} else {
-			if currPattern != currValue {
+			if currPattern != currValue && currPattern != ANY {
 				return false
 			}
+		}
+	}
+
+	return true
+}
+
+func matchMap(pattern interface{}, value interface{}) bool {
+	patternMap := reflect.ValueOf(pattern)
+	valueMap := reflect.ValueOf(value)
+
+	stillUsablePatternKeys := patternMap.MapKeys()
+	stillUsableValueKeys := valueMap.MapKeys()
+
+	for _, pKey := range patternMap.MapKeys() {
+		if !containsValue(stillUsablePatternKeys, pKey) {
+			continue
+		}
+		pVal := patternMap.MapIndex(pKey)
+		matchedLeftAndRight := false
+
+		for _, vKey := range valueMap.MapKeys() {
+			if !containsValue(stillUsableValueKeys, vKey) {
+				continue
+			}
+
+			if !containsValue(stillUsablePatternKeys, pKey) {
+				continue
+			}
+
+			vVal := valueMap.MapIndex(vKey)
+			keyMatched := pKey.Interface() == vKey.Interface()
+			if keyMatched {
+				valueMatched := pVal.Interface() == vVal.Interface() || pVal.Interface() == ANY
+				if valueMatched {
+					matchedLeftAndRight = true
+					removeValue(stillUsablePatternKeys, pKey)
+					removeValue(stillUsableValueKeys, vKey)
+				}
+			}
+		}
+
+		if !matchedLeftAndRight {
+			return false
 		}
 	}
 
@@ -129,7 +179,31 @@ func max(a, b int) int {
 	return a
 }
 
-func contains(vals []reflect.Kind, val reflect.Kind) bool {
+func removeValue(vals []reflect.Value, val reflect.Value) []reflect.Value {
+	indexOf := -1
+	for index, v := range vals {
+		if val.Interface() == v.Interface() {
+			indexOf = index
+			break
+		}
+	}
+
+	vals[indexOf] = vals[len(vals)-1]
+	vals = vals[:len(vals)-1]
+
+	return vals
+}
+
+func containsValue(vals []reflect.Value, val reflect.Value) bool {
+	for _, v := range vals {
+		if val.Interface() == v.Interface() {
+			return true
+		}
+	}
+	return false
+}
+
+func containsKind(vals []reflect.Kind, val reflect.Kind) bool {
 	for _, v := range vals {
 		if val == v {
 			return true
