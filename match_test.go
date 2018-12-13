@@ -1,6 +1,7 @@
 package match
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -128,4 +129,20 @@ func TestMatch_MapPatternDifferentValue(t *testing.T) {
 		Result()
 
 	assert.Equal(t, nil, mr)
+}
+
+func TestMatch_String(t *testing.T) {
+	mr := Match("gophergopher").
+		When("gophergopher", func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, true, mr)
+}
+
+func TestMatch_Regexp(t *testing.T) {
+	mr := Match("gophergopher").
+		When(regexp.MustCompile("(gopher){2}"), func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, true, mr)
 }
