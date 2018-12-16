@@ -146,3 +146,22 @@ func TestMatch_Regexp(t *testing.T) {
 
 	assert.Equal(t, true, mr)
 }
+
+func TestMatch_RegisterPattern(t *testing.T) {
+	myMagicChecker := func(pattern interface{}, value interface{}) bool {
+
+		if pattern == 12345 {
+			return true
+		}
+
+		return false
+	}
+
+	RegisterMatcher(myMagicChecker)
+	mr := Match(1000).
+		When(12345, func() interface{} { return true }).
+		When(1000, func() interface{} { return false }).
+		Result()
+
+	assert.Equal(t, true, mr)
+}

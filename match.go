@@ -12,6 +12,13 @@ type matchItem struct {
 	action  func() interface{}
 }
 
+// PatternChecker is func for checking pattern
+type PatternChecker func(pattern interface{}, value interface{}) bool
+
+var (
+	registeredMatchers []PatternChecker
+)
+
 const (
 	ANY  MatchKey = 0
 	HEAD MatchKey = 1
@@ -38,6 +45,11 @@ func (matcher *Matcher) When(val interface{}, fun func() interface{}) *Matcher {
 	return matcher
 }
 
+// RegisterMatcher register custim pattern
+func RegisterMatcher(pattern PatternChecker) {
+	registeredMatchers = append(registeredMatchers, pattern)
+}
+
 // Result returns the result value of matching process.
 func (matcher *Matcher) Result() interface{} {
 	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
@@ -50,6 +62,12 @@ func (matcher *Matcher) Result() interface{} {
 	valueIsSimpleType := containsKind(simpleTypes, valueKind)
 
 	for _, mi := range matcher.matchItems {
+		for _, registerMatcher := range registeredMatchers {
+			if registerMatcher(mi.pattern, matcher.value) {
+				return mi.action()
+			}
+		}
+
 		if (valueIsSimpleType) && matcher.value == mi.pattern {
 			return mi.action()
 		}

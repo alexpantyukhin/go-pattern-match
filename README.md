@@ -5,7 +5,7 @@ For now the following matching are implemented :
    - [x] Slices (with HEAD, TAIL patterns).
    - [x] Dictionary (with ANY pattern).
    - [x] Regexp.
-   - [ ] Adding custom matching (ability to add special matching for some structs for example)
+   - [x] Adding custom matching (ability to add special matching for some structs for example)
    
 # Usages
 It's possible to try use matching Simple types:
