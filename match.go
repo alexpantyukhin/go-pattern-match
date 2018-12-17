@@ -51,7 +51,7 @@ func RegisterMatcher(pattern PatternChecker) {
 }
 
 // Result returns the result value of matching process.
-func (matcher *Matcher) Result() interface{} {
+func (matcher *Matcher) Result() (bool, interface{}) {
 	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
 		reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16,
 		reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
@@ -64,12 +64,12 @@ func (matcher *Matcher) Result() interface{} {
 	for _, mi := range matcher.matchItems {
 		for _, registerMatcher := range registeredMatchers {
 			if registerMatcher(mi.pattern, matcher.value) {
-				return mi.action()
+				return true, mi.action()
 			}
 		}
 
 		if (valueIsSimpleType) && matcher.value == mi.pattern {
-			return mi.action()
+			return true, mi.action()
 		}
 
 		miKind := reflect.TypeOf(mi.pattern).Kind()
@@ -78,36 +78,35 @@ func (matcher *Matcher) Result() interface{} {
 			miKind == reflect.Slice &&
 			matchSlice(mi.pattern, matcher.value) {
 
-			return mi.action()
+			return true, mi.action()
 		}
 
 		if valueKind == reflect.Map &&
 			miKind == reflect.Map &&
 			matchMap(mi.pattern, matcher.value) {
 
-			return mi.action()
+			return true, mi.action()
 		}
 
 		if valueKind == reflect.String {
 			if miKind == reflect.String {
 				if mi.pattern == matcher.value {
-					return mi.action()
+					return true, mi.action()
 				}
 			}
 
 			reg, ok := mi.pattern.(*regexp.Regexp)
 			if ok {
 				if matchRegexp(reg, matcher.value) {
-					return mi.action()
+					return true, mi.action()
 				}
 			}
 		}
 	}
 
-	return nil
+	return false, nil
 }
 
-// todo: implement
 func matchSlice(pattern interface{}, value interface{}) bool {
 	patternSlice := reflect.ValueOf(pattern)
 	valueSlice := reflect.ValueOf(value)

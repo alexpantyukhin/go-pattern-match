@@ -8,43 +8,43 @@ import (
 )
 
 func TestMatch_SimpleTypeInt(t *testing.T) {
-	mr := Match(42).
+	isMatched, _ := Match(42).
 		When(42, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_SimpleTypeIntMatchWithDifferentType(t *testing.T) {
-	mr := Match(42).
+	isMatched, _ := Match(42).
 		When(int64(42), func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, nil, mr)
+	assert.Equal(t, false, isMatched)
 }
 
 func TestMatch_SliceWithHead(t *testing.T) {
-	mr := Match([]interface{}{1, 2, 3}).
+	isMatched, _ := Match([]interface{}{1, 2, 3}).
 		When([]interface{}{HEAD, 2, 3}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_SliceWithAny(t *testing.T) {
-	mr := Match([]interface{}{1, 2, 3}).
+	isMatched, _ := Match([]interface{}{1, 2, 3}).
 		When([]interface{}{1, ANY, 3}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_SliceWithValueIntType(t *testing.T) {
-	mr := Match([]int{1, 2, 3}).
+	isMatched, _ := Match([]int{1, 2, 3}).
 		When([]interface{}{HEAD, 2, 3}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_SlicePanicsWhenHeadNotFirst(t *testing.T) {
@@ -62,23 +62,23 @@ func TestMatch_SlicePanicsWhenTailNotLast(t *testing.T) {
 }
 
 func TestMatch_SliceHeadNotMatched(t *testing.T) {
-	mr := Match([]int{}).
+	isMatched, _ := Match([]int{}).
 		When([]interface{}{HEAD}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, nil, mr)
+	assert.Equal(t, false, isMatched)
 }
 
 func TestMatch_SliceWithHeadNotMuch(t *testing.T) {
-	mr := Match([]interface{}{1, 2, 3}).
+	isMatched, _ := Match([]interface{}{1, 2, 3}).
 		When([]interface{}{HEAD, 3}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, nil, mr)
+	assert.Equal(t, false, isMatched)
 }
 
 func TestMatch_Map(t *testing.T) {
-	mr := Match(map[string]int{
+	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
 		"r":   2138,
 		"gri": 1908,
@@ -92,11 +92,11 @@ func TestMatch_Map(t *testing.T) {
 		}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_MapPatternWithAny(t *testing.T) {
-	mr := Match(map[string]int{
+	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
 		"r":   2138,
 		"gri": 1908,
@@ -110,11 +110,11 @@ func TestMatch_MapPatternWithAny(t *testing.T) {
 		}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_MapPatternDifferentValue(t *testing.T) {
-	mr := Match(map[string]int{
+	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
 		"r":   2138,
 		"gri": 1908,
@@ -128,23 +128,23 @@ func TestMatch_MapPatternDifferentValue(t *testing.T) {
 		}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, nil, mr)
+	assert.Equal(t, false, isMatched)
 }
 
 func TestMatch_String(t *testing.T) {
-	mr := Match("gophergopher").
+	isMatched, _ := Match("gophergopher").
 		When("gophergopher", func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_Regexp(t *testing.T) {
-	mr := Match("gophergopher").
+	isMatched, _ := Match("gophergopher").
 		When(regexp.MustCompile("(gopher){2}"), func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_RegisterPattern(t *testing.T) {
@@ -158,10 +158,10 @@ func TestMatch_RegisterPattern(t *testing.T) {
 	}
 
 	RegisterMatcher(myMagicChecker)
-	mr := Match(1000).
+	isMatched, _ := Match(1000).
 		When(12345, func() interface{} { return true }).
 		When(1000, func() interface{} { return false }).
 		Result()
 
-	assert.Equal(t, true, mr)
+	assert.Equal(t, true, isMatched)
 }
