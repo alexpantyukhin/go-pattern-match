@@ -1,5 +1,5 @@
 # Pattern matching
-It's just another approach for using pattern matching in Go. I have inspired by [python pattern matching](https://github.com/santinic/pampy) that's why I wanted to made an arrempt to rewrtie something similar on Go :)
+It's just another approach for using pattern matching in Go. I have been inspired by [python pattern matching](https://github.com/santinic/pampy) that's why I wanted to make an attempt to rewrite something similar in Go :)
 For now the following matching are implemented :
    - [x] Simple types (like int, int64, float, float64, bool..).
    - [x] Slices (with HEAD, TAIL patterns).
@@ -11,45 +11,45 @@ For now the following matching are implemented :
 It's possible to try use matching Simple types:
 
 ```go
-	mr := match.Match(42).
-		When(42, func() interface{} { return true }).
-		Result()
+mr := match.Match(42).
+	When(42, func() interface{} { return true }).
+	Result()
 ```
 
 With Maps:
 ```go
-	mr := match.Match(map[string]int{
+mr := match.Match(map[string]int{
+	"rsc": 3711,
+	"r":   2138,
+	"gri": 1908,
+	"adg": 912,
+}).
+	When(map[string]interface{}{
 		"rsc": 3711,
 		"r":   2138,
 		"gri": 1908,
-		"adg": 912,
-	}).
-		When(map[string]interface{}{
-			"rsc": 3711,
-			"r":   2138,
-			"gri": 1908,
-			"adg": match.ANY,
-		}, func() interface{} { return true }).
-		Result()
+		"adg": match.ANY,
+	}, func() interface{} { return true }).
+	Result()
 ```
 
 With Slices:
 ```go
-	mr := match.Match([]int{1, 2, 3}).
-		When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
-		Result()
+mr := match.Match([]int{1, 2, 3}).
+	When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
+	Result()
 ```
 
 With regexps:
 ```go
-	mr := match.Match("gophergopher").
-		When("gophergopher", func() interface{} { return true }).
-		Result()
+mr := match.Match("gophergopher").
+	When("gophergopher", func() interface{} { return true }).
+	Result()
 ```
 
 # Plans:
- - [ ] I would like to implement recursive pattern maching (for matching inner elements of objects)
- - [ ] Possible to have matching without result.
+ - [ ] I would like to implement a recursive pattern matching (for matching inner elements of objects)
+ - [ ] Possibly to have matching without result.
 
 # Installation
 Just `go get` this repository with the following way:
