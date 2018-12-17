@@ -1,4 +1,9 @@
-# Pattern matching
+# Go pattern matching
+===============
+
+.. image:: https://travis-ci.org/alexpantyukhin/go-pattern-match.svg?branch=master
+    :target: https://travis-ci.org/alexpantyukhin/go-pattern-match
+
 It's just another approach for using pattern matching in Go. I have been inspired by [python pattern matching](https://github.com/santinic/pampy) that's why I wanted to make an attempt to rewrite something similar in Go :)
 For now the following matching are implemented :
    - [x] Simple types (like int, int64, float, float64, bool..).
@@ -11,40 +16,40 @@ For now the following matching are implemented :
 It's possible to try use matching Simple types:
 
 ```go
-mr := match.Match(42).
-	When(42, func() interface{} { return true }).
-	Result()
+isMatched, mr := match.Match(42).
+                When(42, func() interface{} { return true }).
+                Result()
 ```
 
 With Maps:
 ```go
-mr := match.Match(map[string]int{
-	"rsc": 3711,
-	"r":   2138,
-	"gri": 1908,
-	"adg": 912,
-}).
-	When(map[string]interface{}{
-		"rsc": 3711,
-		"r":   2138,
-		"gri": 1908,
-		"adg": match.ANY,
-	}, func() interface{} { return true }).
-	Result()
+isMatched, mr := match.Match(map[string]int{
+                	"rsc": 3711,
+                	"r":   2138,
+            	    "gri": 1908,
+                	"adg": 912,
+                }).
+        	    When(map[string]interface{}{
+            		"rsc": 3711,
+            		"r":   2138,
+            		"gri": 1908,
+            		"adg": match.ANY,
+            	}, func() interface{} { return true }).
+            	Result()
 ```
 
 With Slices:
 ```go
-mr := match.Match([]int{1, 2, 3}).
-	When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
-	Result()
+isMatched, mr := match.Match([]int{1, 2, 3}).
+            	When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
+            	Result()
 ```
 
 With regexps:
 ```go
-mr := match.Match("gophergopher").
-	When("gophergopher", func() interface{} { return true }).
-	Result()
+isMatched, mr := match.Match("gophergopher").
+            	When("gophergopher", func() interface{} { return true }).
+            	Result()
 ```
 
 # Plans:
@@ -68,11 +73,14 @@ import (
 )
 
 func main() {
-    mr := match.Match([]int{1, 2, 3}).
+    isMatched, mr := match.Match([]int{1, 2, 3}).
         When(42, func() interface{} { return false } ).
         When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
         Result()
 
-    fmt.Println(mr)
+
+    if isMatched {
+        fmt.Println(mr)
+    }
 }
 ```
