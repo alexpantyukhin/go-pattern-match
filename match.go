@@ -90,12 +90,16 @@ func (matcher *Matcher) Result() interface{} {
 
 		if valueKind == reflect.String {
 			if miKind == reflect.String {
-				return mi.pattern == matcher.value
+				if mi.pattern == matcher.value {
+					return mi.action()
+				}
 			}
 
 			reg, ok := mi.pattern.(*regexp.Regexp)
 			if ok {
-				return matchRegexp(reg, matcher.value)
+				if matchRegexp(reg, matcher.value) {
+					return mi.action()
+				}
 			}
 		}
 	}
