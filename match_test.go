@@ -131,6 +131,24 @@ func TestMatch_MapPatternDifferentValue(t *testing.T) {
 	assert.Equal(t, false, isMatched)
 }
 
+func Match_MapWithInnerSlice(t *testing.T) {
+	isMatched, _ := Match(map[string]interface{}{
+		"rsc": 3711,
+		"r":   2138,
+		"gri": 1908,
+		"adg": []int{1, 2, 3},
+	}).
+		When(map[string]interface{}{
+			"rsc": 3711,
+			"r":   2138,
+			"gri": 1908,
+			"adg": []interface{}{HEAD, 2, TAIL},
+		}, func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, true, isMatched)
+}
+
 func TestMatch_String(t *testing.T) {
 	isMatched, _ := Match("gophergopher").
 		When("gophergopher", func() interface{} { return true }).

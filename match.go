@@ -12,7 +12,7 @@ type matchItem struct {
 	action  func() interface{}
 }
 
-// PatternChecker is func for checking pattern
+// PatternChecker is func for checking pattern.
 type PatternChecker func(pattern interface{}, value interface{}) bool
 
 var (
@@ -20,8 +20,11 @@ var (
 )
 
 const (
-	ANY  MatchKey = 0
+	// ANY is the pattern which allows any value.
+	ANY MatchKey = 0
+	// HEAD is the pattern for start element of silce.
 	HEAD MatchKey = 1
+	// TAIL is the pattern for end element(s) of slice.
 	TAIL MatchKey = 2
 )
 
@@ -31,13 +34,14 @@ type Matcher struct {
 	matchItems []matchItem
 }
 
-// Match func
+// Match function takes a value for matching and
 func Match(val interface{}) *Matcher {
 	matchItems := []matchItem{}
 	return &Matcher{val, matchItems}
 }
 
-// When func
+// When function adds new pattern for checking matching.
+// If pattern matched with value the func will be called.
 func (matcher *Matcher) When(val interface{}, fun func() interface{}) *Matcher {
 	newMatchItem := matchItem{val, fun}
 	matcher.matchItems = append(matcher.matchItems, newMatchItem)
@@ -45,66 +49,75 @@ func (matcher *Matcher) When(val interface{}, fun func() interface{}) *Matcher {
 	return matcher
 }
 
-// RegisterMatcher register custim pattern
+// RegisterMatcher register custom pattern.
 func RegisterMatcher(pattern PatternChecker) {
 	registeredMatchers = append(registeredMatchers, pattern)
 }
 
 // Result returns the result value of matching process.
 func (matcher *Matcher) Result() (bool, interface{}) {
+	for _, mi := range matcher.matchItems {
+		matched := matchValue(mi.pattern, matcher.value)
+		if matched {
+			return true, mi.action()
+		}
+	}
+
+	return false, nil
+}
+
+func matchValue(pattern interface{}, value interface{}) bool {
 	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
 		reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16,
 		reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
 		reflect.Complex64, reflect.Complex128,
 	}
 
-	valueKind := reflect.TypeOf(matcher.value).Kind()
+	valueKind := reflect.TypeOf(value).Kind()
 	valueIsSimpleType := containsKind(simpleTypes, valueKind)
 
-	for _, mi := range matcher.matchItems {
-		for _, registerMatcher := range registeredMatchers {
-			if registerMatcher(mi.pattern, matcher.value) {
-				return true, mi.action()
+	for _, registerMatcher := range registeredMatchers {
+		if registerMatcher(pattern, value) {
+			return true
+		}
+	}
+
+	if (valueIsSimpleType) && value == pattern {
+		return true
+	}
+
+	miKind := reflect.TypeOf(pattern).Kind()
+
+	if valueKind == reflect.Slice &&
+		miKind == reflect.Slice &&
+		matchSlice(pattern, value) {
+
+		return true
+	}
+
+	if valueKind == reflect.Map &&
+		miKind == reflect.Map &&
+		matchMap(pattern, value) {
+
+		return true
+	}
+
+	if valueKind == reflect.String {
+		if miKind == reflect.String {
+			if pattern == value {
+				return true
 			}
 		}
 
-		if (valueIsSimpleType) && matcher.value == mi.pattern {
-			return true, mi.action()
-		}
-
-		miKind := reflect.TypeOf(mi.pattern).Kind()
-
-		if valueKind == reflect.Slice &&
-			miKind == reflect.Slice &&
-			matchSlice(mi.pattern, matcher.value) {
-
-			return true, mi.action()
-		}
-
-		if valueKind == reflect.Map &&
-			miKind == reflect.Map &&
-			matchMap(mi.pattern, matcher.value) {
-
-			return true, mi.action()
-		}
-
-		if valueKind == reflect.String {
-			if miKind == reflect.String {
-				if mi.pattern == matcher.value {
-					return true, mi.action()
-				}
-			}
-
-			reg, ok := mi.pattern.(*regexp.Regexp)
-			if ok {
-				if matchRegexp(reg, matcher.value) {
-					return true, mi.action()
-				}
+		reg, ok := pattern.(*regexp.Regexp)
+		if ok {
+			if matchRegexp(reg, value) {
+				return true
 			}
 		}
 	}
 
-	return false, nil
+	return false
 }
 
 func matchSlice(pattern interface{}, value interface{}) bool {
@@ -146,7 +159,7 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 				break
 			}
 		} else {
-			if currPattern != currValue && currPattern != ANY {
+			if !matchValue(currPattern, currValue) && currPattern != ANY {
 				return false
 			}
 		}
@@ -181,7 +194,7 @@ func matchMap(pattern interface{}, value interface{}) bool {
 			vVal := valueMap.MapIndex(vKey)
 			keyMatched := pKey.Interface() == vKey.Interface()
 			if keyMatched {
-				valueMatched := pVal.Interface() == vVal.Interface() || pVal.Interface() == ANY
+				valueMatched := matchValue(pVal.Interface(), vVal.Interface()) || pVal.Interface() == ANY
 				if valueMatched {
 					matchedLeftAndRight = true
 					removeValue(stillUsablePatternKeys, pKey)
