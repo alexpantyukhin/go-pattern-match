@@ -52,7 +52,7 @@ isMatched, mr := match.Match("gophergopher").
 ```
 
 # Plans:
- - [ ] I would like to implement a recursive pattern matching (for matching inner elements of objects)
+ - [x] I would like to implement a recursive pattern matching (for matching inner elements of objects)
  - [ ] Possibly to have matching without result.
 
 # Installation
