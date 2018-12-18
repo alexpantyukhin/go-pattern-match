@@ -1,6 +1,7 @@
 # Go pattern matching
 [![Build Status](https://travis-ci.org/alexpantyukhin/go-pattern-match.svg?branch=master
 )](https://travis-ci.org/alexpantyukhin/go-pattern-match)
+[![GoDoc](https://godoc.org/alexpantyukhin/go-pattern-match?status.svg)](https://godoc.org/github.com/alexpantyukhin/go-pattern-match)
 
 It's just another approach for using pattern matching in Go. I have been inspired by [python pattern matching](https://github.com/santinic/pampy) that's why I wanted to make an attempt to rewrite something similar in Go :)
 For now the following matching are implemented :
