@@ -77,6 +77,14 @@ func TestMatch_SliceWithHeadNotMuch(t *testing.T) {
 	assert.Equal(t, false, isMatched)
 }
 
+func TestMatch_ArrayWithAny(t *testing.T) {
+	isMatched, _ := Match([3]int{1, 2, 3}).
+		When([]interface{}{1, ANY, 3}, func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, true, isMatched)
+}
+
 func TestMatch_Map(t *testing.T) {
 	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
@@ -182,4 +190,28 @@ func TestMatch_RegisterPattern(t *testing.T) {
 		Result()
 
 	assert.Equal(t, true, isMatched)
+}
+
+type TestStruct struct {
+	value int
+}
+
+func TestMatch_SimpleStructMathc(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(TestStruct{1}, func() interface{} { return 1 }).
+		Result()
+
+	assert.Equal(t, true, isMatched)
+}
+
+func TestMatch_SimpleStructNotMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(TestStruct{2}, func() interface{} { return 1 }).
+		Result()
+
+	assert.Equal(t, false, isMatched)
 }
