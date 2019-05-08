@@ -20,6 +20,16 @@ isMatched, mr := match.Match(42).
                 Result()
 ```
 
+With Structs:
+```go
+val := TestStruct{1}
+
+isMatched, _ := Match(val).
+    When(func(TestStruct) {}, func() interface{} { return 1 }).
+    Result()
+```
+
+
 With Maps:
 ```go
 isMatched, mr := match.Match(map[string]int{

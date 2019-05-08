@@ -215,3 +215,27 @@ func TestMatch_SimpleStructNotMatch(t *testing.T) {
 
 	assert.Equal(t, false, isMatched)
 }
+
+func TestMatch_StructTypeMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(TestStruct) {}, func() interface{} { return 1 }).
+		Result()
+
+	assert.Equal(t, true, isMatched)
+}
+
+type AnotherTestStruct struct {
+	value int
+}
+
+func TestMatch_StructDifferentTypeNotMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(AnotherTestStruct) {}, func() interface{} { return 1 }).
+		Result()
+
+	assert.Equal(t, false, isMatched)
+}
