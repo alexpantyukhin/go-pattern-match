@@ -86,12 +86,18 @@ func matchValue(pattern interface{}, value interface{}) bool {
 		return true
 	}
 
-	patternKind := reflect.TypeOf(pattern).Kind()
+	patternType := reflect.TypeOf(pattern)
+	patternKind := patternType.Kind()
 
 	if (valueKind == reflect.Slice || valueKind == reflect.Array) &&
 		patternKind == reflect.Slice &&
 		matchSlice(pattern, value) {
 
+		return true
+	}
+
+	if patternKind == reflect.Func && patternType.NumIn() == 1 &&
+		matchStruct(patternType.In(0), value) {
 		return true
 	}
 
@@ -174,6 +180,14 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 	}
 
 	return true
+}
+
+func matchStruct(patternType reflect.Type, value interface{}) bool {
+	if patternType.AssignableTo(reflect.TypeOf(value)) {
+		return true
+	}
+
+	return false
 }
 
 func matchMap(pattern interface{}, value interface{}) bool {
