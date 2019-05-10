@@ -6,6 +6,7 @@
 It's just another approach for using pattern matching in Go. I have been inspired by [python pattern matching](https://github.com/santinic/pampy) that's why I wanted to make an attempt to rewrite something similar in Go :)
 For now the following matching are implemented :
    - [x] Simple types (like int, int64, float, float64, bool..).
+   - [x] Struct type.
    - [x] Slices (with HEAD, TAIL patterns).
    - [x] Dictionary (with ANY pattern).
    - [x] Regexp.
