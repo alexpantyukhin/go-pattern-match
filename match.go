@@ -136,6 +136,35 @@ func matchValue(pattern interface{}, value interface{}) bool {
 
 func matchSlice(pattern interface{}, value interface{}) bool {
 	patternSlice := reflect.ValueOf(pattern)
+	patternSliceLen := patternSlice.Len()
+
+	valueSlice := reflect.ValueOf(value)
+	valueSliceLen := valueSlice.Len()
+
+	if patternSliceLen > 0 && patternSlice.Index(0).Interface() == HEAD {
+		if valueSliceLen == 0 {
+			return false
+		}
+
+		patternSliceVal := patternSlice.Slice(1, patternSliceLen)
+		patternSliceLen = patternSliceVal.Len()
+		patternSliceInterface := patternSliceVal.Interface()
+
+		for i := 0; i < valueSliceLen-patternSliceLen+1; i++ {
+			isMatched := matchSubSlice(patternSliceInterface, valueSlice.Slice(i, valueSliceLen).Interface())
+			if isMatched {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	return matchSubSlice(pattern, value)
+}
+
+func matchSubSlice(pattern interface{}, value interface{}) bool {
+	patternSlice := reflect.ValueOf(pattern)
 	valueSlice := reflect.ValueOf(value)
 
 	patternSliceLength := patternSlice.Len()
@@ -159,13 +188,7 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 		currValue := valueSlice.Index(currValueIndex).Interface()
 
 		if currPattern == HEAD {
-			if i != 0 {
-				panic("HEAD can only be in first position of a pattern.")
-			} else {
-				if i > valueSliceMaxIndex {
-					return false
-				}
-			}
+			panic("HEAD can only be in first position of a pattern.")
 		} else if currPattern == TAIL {
 			if patternSliceMaxIndex > i {
 				panic("TAIL must me in last position of the pattern.")
@@ -173,7 +196,7 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 				break
 			}
 		} else {
-			if !matchValue(currPattern, currValue) && currPattern != ANY {
+			if currPattern != ANY && !matchValue(currPattern, currValue) {
 				return false
 			}
 		}
