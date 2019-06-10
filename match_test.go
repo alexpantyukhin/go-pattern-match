@@ -74,7 +74,7 @@ func TestMatch_SliceWithHeadNotMuch(t *testing.T) {
 		When([]interface{}{HEAD, 3}, func() interface{} { return true }).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.Equal(t, true, isMatched)
 }
 
 func TestMatch_ArrayWithAny(t *testing.T) {
