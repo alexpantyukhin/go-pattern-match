@@ -69,7 +69,7 @@ func TestMatch_SliceHeadNotMatched(t *testing.T) {
 	assert.Equal(t, false, isMatched)
 }
 
-func TestMatch_SliceWithHeadNotMuch(t *testing.T) {
+func TestMatch_SliceWithHeadMoreThanOneElement(t *testing.T) {
 	isMatched, _ := Match([]interface{}{1, 2, 3}).
 		When([]interface{}{HEAD, 3}, func() interface{} { return true }).
 		Result()
