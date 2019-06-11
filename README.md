@@ -51,7 +51,7 @@ isMatched, mr := match.Match(map[string]int{
 With Slices:
 ```go
 isMatched, mr := match.Match([]int{1, 2, 3}).
-            	When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
+            	When([]interface{}{match.HEAD, 3}, func() interface{} { return true }).
             	Result()
 ```
 
