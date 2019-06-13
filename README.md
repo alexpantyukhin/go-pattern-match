@@ -55,6 +55,13 @@ isMatched, mr := match.Match([]int{1, 2, 3}).
             	Result()
 ```
 
+With Slices OneOf:
+```go
+isMatched, mr := match.Match([]int{1, 2, 3}).
+            	When([]interface{}{1, match.OneOf(1, 2, 3), 3}, func() interface{} { return true }).
+            	Result()
+```
+
 With regexps:
 ```go
 isMatched, mr := match.Match("gophergopher").

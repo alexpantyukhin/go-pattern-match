@@ -28,6 +28,15 @@ const (
 	TAIL MatchKey = 2
 )
 
+type oneOfContainer struct {
+	items []interface{}
+}
+
+// OneOf defines the pattern where at least one item matches.
+func OneOf(items ...interface{}) oneOfContainer {
+	return oneOfContainer{items}
+}
+
 // Matcher struct
 type Matcher struct {
 	value      interface{}
@@ -179,6 +188,7 @@ func matchSubSlice(pattern interface{}, value interface{}) bool {
 
 	patternSliceMaxIndex := patternSliceLength - 1
 	valueSliceMaxIndex := valueSliceLength - 1
+	oneOfContainerType := reflect.TypeOf(oneOfContainer{})
 
 	for i := 0; i < max(patternSliceLength, valueSliceLength); i++ {
 		currPatternIndex := min(i, patternSliceMaxIndex)
@@ -194,6 +204,19 @@ func matchSubSlice(pattern interface{}, value interface{}) bool {
 				panic("TAIL must me in last position of the pattern.")
 			} else {
 				break
+			}
+		} else if reflect.TypeOf(currPattern).AssignableTo(oneOfContainerType) {
+			oneOfContainerPatternInstance := currPattern.(oneOfContainer)
+			matched := false
+			for _, item := range oneOfContainerPatternInstance.items {
+				if matchValue(item, currValue) {
+					matched = true
+					break
+				}
+			}
+
+			if !matched {
+				return false
 			}
 		} else {
 			if currPattern != ANY && !matchValue(currPattern, currValue) {
