@@ -206,16 +206,7 @@ func matchSubSlice(pattern interface{}, value interface{}) bool {
 				break
 			}
 		} else if reflect.TypeOf(currPattern).AssignableTo(oneOfContainerType) {
-			oneOfContainerPatternInstance := currPattern.(oneOfContainer)
-			matched := false
-			for _, item := range oneOfContainerPatternInstance.items {
-				if matchValue(item, currValue) {
-					matched = true
-					break
-				}
-			}
-
-			if !matched {
+			if (!oneOfContainerPatternMatch(currPattern, currValue)){
 				return false
 			}
 		} else {
@@ -242,6 +233,7 @@ func matchMap(pattern interface{}, value interface{}) bool {
 
 	stillUsablePatternKeys := patternMap.MapKeys()
 	stillUsableValueKeys := valueMap.MapKeys()
+	oneOfContainerType := reflect.TypeOf(oneOfContainer{})
 
 	for _, pKey := range patternMap.MapKeys() {
 		if !containsValue(stillUsablePatternKeys, pKey) {
@@ -262,7 +254,10 @@ func matchMap(pattern interface{}, value interface{}) bool {
 			vVal := valueMap.MapIndex(vKey)
 			keyMatched := pKey.Interface() == vKey.Interface()
 			if keyMatched {
-				valueMatched := matchValue(pVal.Interface(), vVal.Interface()) || pVal.Interface() == ANY
+				pValInterface := pVal.Interface()
+				vValInterface := vVal.Interface()
+				valueMatched := pValInterface == ANY || matchValue(pValInterface, vValInterface) || 
+								(reflect.TypeOf(pValInterface).AssignableTo(oneOfContainerType) && oneOfContainerPatternMatch(pValInterface, vValInterface))
 				if valueMatched {
 					matchedLeftAndRight = true
 					removeValue(stillUsablePatternKeys, pKey)
@@ -277,6 +272,19 @@ func matchMap(pattern interface{}, value interface{}) bool {
 	}
 
 	return true
+}
+
+func oneOfContainerPatternMatch(oneOfPattern interface{}, value interface{}) bool {
+	oneOfContainerPatternInstance := oneOfPattern.(oneOfContainer)
+	matched := false
+	for _, item := range oneOfContainerPatternInstance.items {
+		if matchValue(item, value) {
+			matched = true
+			break
+		}
+	}
+
+	return matched
 }
 
 func matchRegexp(regexp *regexp.Regexp, value interface{}) bool {
