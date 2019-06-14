@@ -9,7 +9,7 @@ type MatchKey int
 
 type matchItem struct {
 	pattern interface{}
-	action  func() interface{}
+	action  interface{}
 }
 
 // PatternChecker is func for checking pattern.
@@ -51,7 +51,7 @@ func Match(val interface{}) *Matcher {
 
 // When function adds new pattern for checking matching.
 // If pattern matched with value the func will be called.
-func (matcher *Matcher) When(val interface{}, fun func() interface{}) *Matcher {
+func (matcher *Matcher) When(val interface{}, fun interface{}) *Matcher {
 	newMatchItem := matchItem{val, fun}
 	matcher.matchItems = append(matcher.matchItems, newMatchItem)
 
@@ -68,7 +68,12 @@ func (matcher *Matcher) Result() (bool, interface{}) {
 	for _, mi := range matcher.matchItems {
 		matched := matchValue(mi.pattern, matcher.value)
 		if matched {
-			return true, mi.action()
+			if reflect.TypeOf(mi.action).Kind() == reflect.Func {
+				var params []reflect.Value
+				return true, reflect.ValueOf(mi.action).Call(params)[0].Interface()
+			}
+
+			return true, mi.action
 		}
 	}
 
@@ -206,7 +211,7 @@ func matchSubSlice(pattern interface{}, value interface{}) bool {
 				break
 			}
 		} else if reflect.TypeOf(currPattern).AssignableTo(oneOfContainerType) {
-			if (!oneOfContainerPatternMatch(currPattern, currValue)){
+			if !oneOfContainerPatternMatch(currPattern, currValue) {
 				return false
 			}
 		} else {
@@ -256,8 +261,8 @@ func matchMap(pattern interface{}, value interface{}) bool {
 			if keyMatched {
 				pValInterface := pVal.Interface()
 				vValInterface := vVal.Interface()
-				valueMatched := pValInterface == ANY || matchValue(pValInterface, vValInterface) || 
-								(reflect.TypeOf(pValInterface).AssignableTo(oneOfContainerType) && oneOfContainerPatternMatch(pValInterface, vValInterface))
+				valueMatched := pValInterface == ANY || matchValue(pValInterface, vValInterface) ||
+					(reflect.TypeOf(pValInterface).AssignableTo(oneOfContainerType) && oneOfContainerPatternMatch(pValInterface, vValInterface))
 				if valueMatched {
 					matchedLeftAndRight = true
 					removeValue(stillUsablePatternKeys, pKey)
