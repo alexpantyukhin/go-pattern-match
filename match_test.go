@@ -137,6 +137,44 @@ func TestMatch_MapPatternWithAny(t *testing.T) {
 	assert.Equal(t, true, isMatched)
 }
 
+
+func TestMatch_MapPatternWithOneOf(t *testing.T) {
+	isMatched, _ := Match(map[string]int{
+		"rsc": 3711,
+		"r":   2138,
+		"gri": 1908,
+		"adg": 912,
+	}).
+		When(map[string]interface{}{
+			"rsc": 3711,
+			"r":   2138,
+			"gri": 1908,
+			"adg": OneOf(111, 912),
+		}, func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, true, isMatched)
+}
+
+
+func TestMatch_MapPatternWithOneOfNotMatch(t *testing.T) {
+	isMatched, _ := Match(map[string]int{
+		"rsc": 3711,
+		"r":   2138,
+		"gri": 1908,
+		"adg": 912,
+	}).
+		When(map[string]interface{}{
+			"rsc": 3711,
+			"r":   2138,
+			"gri": 1908,
+			"adg": OneOf(111, 913),
+		}, func() interface{} { return true }).
+		Result()
+
+	assert.Equal(t, false, isMatched)
+}
+
 func TestMatch_MapPatternDifferentValue(t *testing.T) {
 	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
