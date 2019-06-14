@@ -17,8 +17,9 @@ It's possible to try use matching Simple types:
 
 ```go
 isMatched, mr := match.Match(42).
-                When(42, func() interface{} { return true }).
+                When(42, 10).
                 Result()
+// isMatched - true, mr - 10
 ```
 
 With Structs:
@@ -26,7 +27,7 @@ With Structs:
 val := TestStruct{1}
 
 isMatched, _ := Match(val).
-    When(func(TestStruct) {}, func() interface{} { return 1 }).
+    When(func(TestStruct) {},  1).
     Result()
 ```
 
@@ -44,21 +45,14 @@ isMatched, mr := match.Match(map[string]int{
                 	"r":   2138,
                 	"gri": 1908,
                 	"adg": match.ANY,
-            	}, func() interface{} { return true }).
+            	}, true).
             	Result()
 ```
 
 With Slices:
 ```go
-isMatched, mr := match.Match([]int{1, 2, 3}).
-            	When([]interface{}{match.HEAD, 3}, func() interface{} { return true }).
-            	Result()
-```
-
-With Slices OneOf:
-```go
-isMatched, mr := match.Match([]int{1, 2, 3}).
-            	When([]interface{}{1, match.OneOf(1, 2, 3), 3}, func() interface{} { return true }).
+isMatched, mr := match.Match([]int{1, 2, 3, 4, 5, 6}).
+            	When([]interface{}{match.HEAD, 3, match.OneOf(3, 4), 5, 6}, 125).
             	Result()
 ```
 
