@@ -87,6 +87,10 @@ func matchValue(pattern interface{}, value interface{}) bool {
 		reflect.Complex64, reflect.Complex128,
 	}
 
+	if pattern == ANY {
+		return true
+	}
+
 	valueKind := reflect.TypeOf(value).Kind()
 	valueIsSimpleType := containsKind(simpleTypes, valueKind)
 

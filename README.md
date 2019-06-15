@@ -13,7 +13,22 @@ For now the following matching are implemented :
    - [x] Adding custom matching (ability to add special matching for some structs for example)
    
 # Usages
-It's possible to try use matching Simple types:
+
+## Fibonacci example:
+
+```go
+func fib(n int) int {
+	_, res := Match(n).
+		When(1, 1).
+		When(2, 1).
+		When(ANY, func() int { return fib(n-1) + fib(n-2) }).
+		Result()
+
+	return res.(int)
+}
+```
+
+## Simple types:
 
 ```go
 isMatched, mr := match.Match(42).
@@ -22,7 +37,7 @@ isMatched, mr := match.Match(42).
 // isMatched - true, mr - 10
 ```
 
-With Structs:
+## With Structs:
 ```go
 val := TestStruct{1}
 
@@ -32,7 +47,7 @@ isMatched, _ := Match(val).
 ```
 
 
-With Maps:
+## With Maps:
 ```go
 isMatched, mr := match.Match(map[string]int{
                 	"rsc": 3711,
@@ -49,14 +64,14 @@ isMatched, mr := match.Match(map[string]int{
             	Result()
 ```
 
-With Slices:
+## With Slices:
 ```go
 isMatched, mr := match.Match([]int{1, 2, 3, 4, 5, 6}).
             	When([]interface{}{match.HEAD, 3, match.OneOf(3, 4), 5, 6}, 125).
             	Result()
 ```
 
-With regexps:
+## With regexps:
 ```go
 isMatched, mr := match.Match("gophergopher").
             	When("gophergopher", func() interface{} { return true }).
