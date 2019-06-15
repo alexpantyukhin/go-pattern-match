@@ -15,6 +15,30 @@ func TestMatch_SimpleTypeInt(t *testing.T) {
 	assert.Equal(t, true, isMatched)
 }
 
+func TestMatch_AnyPattern(t *testing.T) {
+	_, res := Match(5).
+		When(1, 1).
+		When(2, 2).
+		When(ANY, 10).
+		Result()
+
+	assert.Equal(t, 10, res)
+}
+
+func fib(n int) int {
+	_, res := Match(n).
+		When(1, 1).
+		When(2, 1).
+		When(ANY, func() int { return fib(n-1) + fib(n-2) }).
+		Result()
+
+	return res.(int)
+}
+
+func TestMatch_Fibonacci(t *testing.T) {
+	assert.Equal(t, 21, fib(8))
+}
+
 func TestMatch_SimpleTypeIntWithFunc(t *testing.T) {
 	_, res := Match(42).
 		When(42, func() interface{} { return 84 }).
