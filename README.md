@@ -18,10 +18,10 @@ For now the following matching are implemented :
 
 ```go
 func fib(n int) int {
-	_, res := Match(n).
+	_, res := match.Match(n).
 		When(1, 1).
 		When(2, 1).
-		When(ANY, func() int { return fib(n-1) + fib(n-2) }).
+		When(match.ANY, func() int { return fib(n-1) + fib(n-2) }).
 		Result()
 
 	return res.(int)
