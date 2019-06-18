@@ -100,8 +100,8 @@ import (
 
 func main() {
     isMatched, mr := match.Match([]int{1, 2, 3}).
-        When(42, func() interface{} { return false } ).
-        When([]interface{}{match.HEAD, 2, 3}, func() interface{} { return true }).
+        When(42, false).
+        When([]interface{}{match.HEAD, 2, 3}, true).
         Result()
 
 
