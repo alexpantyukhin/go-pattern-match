@@ -133,6 +133,32 @@ func TestMatch_ArrayWithAny(t *testing.T) {
 	assert.Equal(t, true, isMatched)
 }
 
+func TestMatch_SliceWithMatchedItems(t *testing.T) {
+	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{HEAD, 3, TAIL}, func(head MatchItem, tail MatchItem) [][]interface{} {
+			return [][]interface{}{head.valueAsSlice, tail.valueAsSlice}
+		}).
+		Result()
+
+	convertedRes := res.([][]interface{})
+
+	assert.Equal(t, true, isMatched)
+	assert.Equal(t, convertedRes[0][0].(int), 1)
+	assert.Equal(t, convertedRes[0][1].(int), 2)
+
+	assert.Equal(t, convertedRes[1][0].(int), 4)
+	assert.Equal(t, convertedRes[1][1].(int), 5)
+}
+
+func interfacesToInt(interfaces []interface{}) []int {
+	var ints []int
+	for i := 0; i < len(interfaces); i++ {
+		ints = append(ints, interfaces[i].(int))
+	}
+
+	return ints
+}
+
 func TestMatch_Map(t *testing.T) {
 	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
