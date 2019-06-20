@@ -150,13 +150,19 @@ func TestMatch_SliceWithMatchedItems(t *testing.T) {
 	assert.Equal(t, convertedRes[1][1].(int), 5)
 }
 
-func interfacesToInt(interfaces []interface{}) []int {
-	var ints []int
-	for i := 0; i < len(interfaces); i++ {
-		ints = append(ints, interfaces[i].(int))
-	}
+func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
+	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{HEAD, 2, ANY, 4, TAIL}, func(head MatchItem, any MatchItem, tail MatchItem) [][]interface{} {
+			return [][]interface{}{head.valueAsSlice, []interface{}{any.value}, tail.valueAsSlice}
+		}).
+		Result()
 
-	return ints
+	convertedRes := res.([][]interface{})
+
+	assert.Equal(t, true, isMatched)
+	assert.Equal(t, convertedRes[0][0].(int), 1)
+	assert.Equal(t, convertedRes[1][0].(int), 3)
+	assert.Equal(t, convertedRes[2][0].(int), 5)
 }
 
 func TestMatch_Map(t *testing.T) {
