@@ -28,6 +28,11 @@ const (
 	TAIL MatchKey = 2
 )
 
+type MatchItem struct {
+	value        interface{}
+	valueAsSlice []interface{}
+}
+
 type oneOfContainer struct {
 	items []interface{}
 }
@@ -66,10 +71,25 @@ func RegisterMatcher(pattern PatternChecker) {
 // Result returns the result value of matching process.
 func (matcher *Matcher) Result() (bool, interface{}) {
 	for _, mi := range matcher.matchItems {
-		matched := matchValue(mi.pattern, matcher.value)
+		matchedItems, matched := matchValue(mi.pattern, matcher.value)
 		if matched {
-			if reflect.TypeOf(mi.action).Kind() == reflect.Func {
+			miActionType := reflect.TypeOf(mi.action)
+			if miActionType.Kind() == reflect.Func {
+				numberOfArgs := miActionType.NumIn()
+				lenMatchedItems := len(matchedItems)
+				if numberOfArgs > lenMatchedItems {
+					for i := lenMatchedItems; i < numberOfArgs; i++ {
+						matchedItems = append(matchedItems, MatchItem{value: nil})
+					}
+				} else if lenMatchedItems > numberOfArgs {
+					matchedItems = matchedItems[:numberOfArgs]
+				}
+
 				var params []reflect.Value
+				for i := 0; i < len(matchedItems); i++ {
+					params = append(params, reflect.ValueOf(matchedItems[i]))
+				}
+
 				return true, reflect.ValueOf(mi.action).Call(params)[0].Interface()
 			}
 
@@ -80,7 +100,7 @@ func (matcher *Matcher) Result() (bool, interface{}) {
 	return false, nil
 }
 
-func matchValue(pattern interface{}, value interface{}) bool {
+func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
 		reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16,
 		reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
@@ -88,7 +108,7 @@ func matchValue(pattern interface{}, value interface{}) bool {
 	}
 
 	if pattern == ANY {
-		return true
+		return nil, true
 	}
 
 	valueKind := reflect.TypeOf(value).Kind()
@@ -96,47 +116,49 @@ func matchValue(pattern interface{}, value interface{}) bool {
 
 	for _, registerMatcher := range registeredMatchers {
 		if registerMatcher(pattern, value) {
-			return true
+			return nil, true
 		}
 	}
 
 	if (valueIsSimpleType) && value == pattern {
-		return true
+		return nil, true
 	}
 
 	patternType := reflect.TypeOf(pattern)
 	patternKind := patternType.Kind()
 
 	if (valueKind == reflect.Slice || valueKind == reflect.Array) &&
-		patternKind == reflect.Slice &&
-		matchSlice(pattern, value) {
+		patternKind == reflect.Slice {
 
-		return true
+		matchedItems, isMatched := matchSlice(pattern, value)
+		if isMatched {
+			return matchedItems, isMatched
+		}
 	}
 
 	if patternKind == reflect.Func && patternType.NumIn() == 1 &&
 		matchStruct(patternType.In(0), value) {
-		return true
+		return nil, true
 	}
 
 	if valueKind == reflect.Map &&
 		patternKind == reflect.Map &&
 		matchMap(pattern, value) {
 
-		return true
+		return nil, true
 	}
 
 	if valueKind == reflect.String {
 		if patternKind == reflect.String {
 			if pattern == value {
-				return true
+				return nil, true
 			}
 		}
 
 		reg, ok := pattern.(*regexp.Regexp)
 		if ok {
 			if matchRegexp(reg, value) {
-				return true
+				return nil, true
 			}
 		}
 	}
@@ -144,15 +166,15 @@ func matchValue(pattern interface{}, value interface{}) bool {
 	if valueKind == reflect.Struct {
 		if patternKind == reflect.Struct {
 			if value == pattern {
-				return true
+				return nil, true
 			}
 		}
 	}
 
-	return false
+	return nil, false
 }
 
-func matchSlice(pattern interface{}, value interface{}) bool {
+func matchSlice(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 	patternSlice := reflect.ValueOf(pattern)
 	patternSliceLen := patternSlice.Len()
 
@@ -161,7 +183,7 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 
 	if patternSliceLen > 0 && patternSlice.Index(0).Interface() == HEAD {
 		if valueSliceLen == 0 {
-			return false
+			return nil, false
 		}
 
 		patternSliceVal := patternSlice.Slice(1, patternSliceLen)
@@ -169,30 +191,33 @@ func matchSlice(pattern interface{}, value interface{}) bool {
 		patternSliceInterface := patternSliceVal.Interface()
 
 		for i := 0; i < valueSliceLen-patternSliceLen+1; i++ {
-			isMatched := matchSubSlice(patternSliceInterface, valueSlice.Slice(i, valueSliceLen).Interface())
+			matchedItems, isMatched := matchSubSlice(patternSliceInterface, valueSlice.Slice(i, valueSliceLen).Interface())
+			resMatchedItems := append([]MatchItem{MatchItem{valueAsSlice: sliceValueToSliceOfInterfaces(valueSlice.Slice(0, i))}}, matchedItems...)
 			if isMatched {
-				return true
+				return resMatchedItems, true
 			}
 		}
 
-		return false
+		return nil, false
 	}
 
 	return matchSubSlice(pattern, value)
 }
 
-func matchSubSlice(pattern interface{}, value interface{}) bool {
+func matchSubSlice(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 	patternSlice := reflect.ValueOf(pattern)
 	valueSlice := reflect.ValueOf(value)
 
 	patternSliceLength := patternSlice.Len()
 	valueSliceLength := valueSlice.Len()
 
+	matchedItems := make([]MatchItem, 0)
+
 	if patternSliceLength == 0 || valueSliceLength == 0 {
 		if patternSliceLength == valueSliceLength {
-			return true
+			return nil, true
 		}
-		return false
+		return nil, false
 	}
 
 	patternSliceMaxIndex := patternSliceLength - 1
@@ -212,20 +237,35 @@ func matchSubSlice(pattern interface{}, value interface{}) bool {
 			if patternSliceMaxIndex > i {
 				panic("TAIL must me in last position of the pattern.")
 			} else {
+				matchedItems = append(matchedItems, MatchItem{valueAsSlice: sliceValueToSliceOfInterfaces(valueSlice.Slice(i, valueSliceMaxIndex+1))})
 				break
 			}
 		} else if reflect.TypeOf(currPattern).AssignableTo(oneOfContainerType) {
 			if !oneOfContainerPatternMatch(currPattern, currValue) {
-				return false
+				return matchedItems, false
 			}
+		} else if currPattern == ANY {
+			matchedItems = append(matchedItems, MatchItem{value: currValue})
+			continue
 		} else {
-			if currPattern != ANY && !matchValue(currPattern, currValue) {
-				return false
+			isMatched := matchValueBool(currPattern, currValue)
+
+			if !isMatched {
+				return matchedItems, false
 			}
 		}
 	}
 
-	return true
+	return matchedItems, true
+}
+
+func sliceValueToSliceOfInterfaces(val reflect.Value) []interface{} {
+	var res []interface{}
+	for i := 0; i < val.Len(); i++ {
+		res = append(res, val.Index(i).Interface())
+	}
+
+	return res
 }
 
 func matchStruct(patternType reflect.Type, value interface{}) bool {
@@ -265,7 +305,7 @@ func matchMap(pattern interface{}, value interface{}) bool {
 			if keyMatched {
 				pValInterface := pVal.Interface()
 				vValInterface := vVal.Interface()
-				valueMatched := pValInterface == ANY || matchValue(pValInterface, vValInterface) ||
+				valueMatched := pValInterface == ANY || matchValueBool(pValInterface, vValInterface) ||
 					(reflect.TypeOf(pValInterface).AssignableTo(oneOfContainerType) && oneOfContainerPatternMatch(pValInterface, vValInterface))
 				if valueMatched {
 					matchedLeftAndRight = true
@@ -283,11 +323,16 @@ func matchMap(pattern interface{}, value interface{}) bool {
 	return true
 }
 
+func matchValueBool(pattern interface{}, value interface{}) bool {
+	_, res := matchValue(pattern, value)
+	return res
+}
+
 func oneOfContainerPatternMatch(oneOfPattern interface{}, value interface{}) bool {
 	oneOfContainerPatternInstance := oneOfPattern.(oneOfContainer)
 	matched := false
 	for _, item := range oneOfContainerPatternInstance.items {
-		if matchValue(item, value) {
+		if matchValueBool(item, value) {
 			matched = true
 			break
 		}
