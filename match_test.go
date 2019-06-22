@@ -316,7 +316,7 @@ type TestStruct struct {
 	value int
 }
 
-func TestMatch_SimpleStructMathc(t *testing.T) {
+func TestMatch_SimpleStructMatch(t *testing.T) {
 	val := TestStruct{1}
 
 	isMatched, _ := Match(val).
