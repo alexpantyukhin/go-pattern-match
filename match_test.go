@@ -12,7 +12,7 @@ func TestMatch_SimpleTypeInt(t *testing.T) {
 		When(42, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_AnyPattern(t *testing.T) {
@@ -52,7 +52,7 @@ func TestMatch_SimpleTypeIntMatchWithDifferentType(t *testing.T) {
 		When(int64(42), true).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_SliceWithHead(t *testing.T) {
@@ -60,7 +60,7 @@ func TestMatch_SliceWithHead(t *testing.T) {
 		When([]interface{}{HEAD, 2, 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SliceWithAny(t *testing.T) {
@@ -68,7 +68,7 @@ func TestMatch_SliceWithAny(t *testing.T) {
 		When([]interface{}{1, ANY, 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SliceWithValueIntType(t *testing.T) {
@@ -76,7 +76,7 @@ func TestMatch_SliceWithValueIntType(t *testing.T) {
 		When([]interface{}{HEAD, 2, 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SlicePanicsWhenHeadNotFirst(t *testing.T) {
@@ -98,7 +98,7 @@ func TestMatch_SliceHeadNotMatched(t *testing.T) {
 		When([]interface{}{HEAD}, true).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_SliceWithHeadMoreThanOneElement(t *testing.T) {
@@ -106,7 +106,7 @@ func TestMatch_SliceWithHeadMoreThanOneElement(t *testing.T) {
 		When([]interface{}{HEAD, 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SliceWithOneOf(t *testing.T) {
@@ -114,7 +114,7 @@ func TestMatch_SliceWithOneOf(t *testing.T) {
 		When([]interface{}{1, OneOf(1, 2, 3), 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SliceWithOneOfDoesntMatch(t *testing.T) {
@@ -122,7 +122,7 @@ func TestMatch_SliceWithOneOfDoesntMatch(t *testing.T) {
 		When([]interface{}{1, OneOf(4, 5, 6), 3}, true).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_ArrayWithAny(t *testing.T) {
@@ -130,7 +130,7 @@ func TestMatch_ArrayWithAny(t *testing.T) {
 		When([]interface{}{1, ANY, 3}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SliceWithMatchedItems(t *testing.T) {
@@ -142,12 +142,14 @@ func TestMatch_SliceWithMatchedItems(t *testing.T) {
 
 	convertedRes := res.([][]interface{})
 
-	assert.Equal(t, true, isMatched)
-	assert.Equal(t, convertedRes[0][0].(int), 1)
-	assert.Equal(t, convertedRes[0][1].(int), 2)
+	assert := assert.New(t)
 
-	assert.Equal(t, convertedRes[1][0].(int), 4)
-	assert.Equal(t, convertedRes[1][1].(int), 5)
+	assert.True(isMatched)
+	assert.Equal(1, convertedRes[0][0].(int))
+	assert.Equal(2, convertedRes[0][1].(int))
+
+	assert.Equal(4, convertedRes[1][0].(int))
+	assert.Equal(5, convertedRes[1][1].(int))
 }
 
 func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
@@ -159,10 +161,12 @@ func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
 
 	convertedRes := res.([][]interface{})
 
-	assert.Equal(t, true, isMatched)
-	assert.Equal(t, convertedRes[0][0].(int), 1)
-	assert.Equal(t, convertedRes[1][0].(int), 3)
-	assert.Equal(t, convertedRes[2][0].(int), 5)
+	assert := assert.New(t)
+
+	assert.True(isMatched)
+	assert.Equal(1, convertedRes[0][0].(int))
+	assert.Equal(3, convertedRes[1][0].(int))
+	assert.Equal(5, convertedRes[2][0].(int))
 }
 
 func TestMatch_Map(t *testing.T) {
@@ -180,7 +184,7 @@ func TestMatch_Map(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_MapPatternWithAny(t *testing.T) {
@@ -198,7 +202,7 @@ func TestMatch_MapPatternWithAny(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_MapPatternWithOneOf(t *testing.T) {
@@ -216,7 +220,7 @@ func TestMatch_MapPatternWithOneOf(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_MapPatternWithOneOfNotMatch(t *testing.T) {
@@ -234,7 +238,7 @@ func TestMatch_MapPatternWithOneOfNotMatch(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_MapPatternDifferentValue(t *testing.T) {
@@ -252,7 +256,7 @@ func TestMatch_MapPatternDifferentValue(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_MapWithInnerSlice(t *testing.T) {
@@ -270,7 +274,7 @@ func TestMatch_MapWithInnerSlice(t *testing.T) {
 		}, true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_String(t *testing.T) {
@@ -278,7 +282,7 @@ func TestMatch_String(t *testing.T) {
 		When("gophergopher", true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_Regexp(t *testing.T) {
@@ -286,7 +290,7 @@ func TestMatch_Regexp(t *testing.T) {
 		When(regexp.MustCompile("(gopher){2}"), true).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_RegisterPattern(t *testing.T) {
@@ -305,7 +309,7 @@ func TestMatch_RegisterPattern(t *testing.T) {
 		When(1000, false).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 type TestStruct struct {
@@ -319,7 +323,7 @@ func TestMatch_SimpleStructMathc(t *testing.T) {
 		When(TestStruct{1}, 1).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 func TestMatch_SimpleStructNotMatch(t *testing.T) {
@@ -329,7 +333,7 @@ func TestMatch_SimpleStructNotMatch(t *testing.T) {
 		When(TestStruct{2}, 1).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
 
 func TestMatch_StructTypeMatch(t *testing.T) {
@@ -339,7 +343,7 @@ func TestMatch_StructTypeMatch(t *testing.T) {
 		When(func(TestStruct) {}, 1).
 		Result()
 
-	assert.Equal(t, true, isMatched)
+	assert.True(t, isMatched)
 }
 
 type AnotherTestStruct struct {
@@ -353,5 +357,5 @@ func TestMatch_StructDifferentTypeNotMatch(t *testing.T) {
 		When(func(AnotherTestStruct) {}, 1).
 		Result()
 
-	assert.Equal(t, false, isMatched)
+	assert.False(t, isMatched)
 }
