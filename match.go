@@ -95,7 +95,7 @@ func (matcher *Matcher) Result() (bool, interface{}) {
 					return true, funcRes[0].Interface()
 				}
 
-				return true, interface{}
+				return true, nil
 			}
 
 			return true, mi.action
