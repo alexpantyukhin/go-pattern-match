@@ -90,7 +90,12 @@ func (matcher *Matcher) Result() (bool, interface{}) {
 					params = append(params, reflect.ValueOf(matchedItems[i]))
 				}
 
-				return true, reflect.ValueOf(mi.action).Call(params)[0].Interface()
+				funcRes := reflect.ValueOf(mi.action).Call(params)
+				if (len(funcRes)) > 0 {
+					return true, funcRes[0].Interface()
+				}
+
+				return true, interface{}
 			}
 
 			return true, mi.action
