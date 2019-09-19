@@ -39,6 +39,12 @@ func TestMatch_Fibonacci(t *testing.T) {
 	assert.Equal(t, 21, fib(8))
 }
 
+func TestMatch_MatchWithoutResult(t *testing.T){
+	Match(10).
+	When(10, func() { assert.True(t, true) }).
+	Result()
+}
+
 func TestMatch_SimpleTypeIntWithFunc(t *testing.T) {
 	_, res := Match(42).
 		When(42, func() interface{} { return 84 }).
