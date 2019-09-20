@@ -46,7 +46,6 @@ isMatched, _ := Match(val).
     Result()
 ```
 
-
 ## With Maps:
 ```go
 isMatched, mr := match.Match(map[string]int{
@@ -74,13 +73,18 @@ isMatched, mr := match.Match([]int{1, 2, 3, 4, 5, 6}).
 ## With regexps:
 ```go
 isMatched, mr := match.Match("gophergopher").
-            	When("gophergopher", func() interface{} { return true }).
+				When("gophergopher", func() interface{} { return true }).
+				When("gophergopher", func() interface{} { return true }).
             	Result()
 ```
 
-# Plans:
- - [x] I would like to implement a recursive pattern matching (for matching inner elements of objects)
- - [ ] Possibly to have matching without result.
+## Without result:
+```go
+	Match(val).
+	When(42, func() { fmt.Println("You found the answer to life, universe and everything!") }).
+	When(ANY, func() { fmt.Println("No.. It's not an answer.") }).
+	Result()
+```
 
 # Installation
 Just `go get` this repository with the following way:
