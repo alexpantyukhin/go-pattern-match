@@ -42,6 +42,7 @@ func TestMatch_Fibonacci(t *testing.T) {
 func TestMatch_MatchWithoutResult(t *testing.T){
 	Match(10).
 	When(10, func() { assert.True(t, true) }).
+	When(ANY, func() { assert.False(t, true) }).
 	Result()
 }
 
