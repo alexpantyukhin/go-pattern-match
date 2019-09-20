@@ -79,10 +79,12 @@ isMatched, mr := match.Match("gophergopher").
 
 ## Without result:
 ```go
+func main() {
 	Match(val).
 	When(42, func() { fmt.Println("You found the answer to life, universe and everything!") }).
 	When(ANY, func() { fmt.Println("No.. It's not an answer.") }).
 	Result()
+}
 ```
 
 # Installation
