@@ -74,7 +74,6 @@ isMatched, mr := match.Match([]int{1, 2, 3, 4, 5, 6}).
 ```go
 isMatched, mr := match.Match("gophergopher").
 				When("gophergopher", func() interface{} { return true }).
-				When("gophergopher", func() interface{} { return true }).
             	Result()
 ```
 
