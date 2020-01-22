@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-type MatchKey int
+type matchKey int
 
 type matchItem struct {
 	pattern interface{}
@@ -21,13 +21,14 @@ var (
 
 const (
 	// ANY is the pattern which allows any value.
-	ANY MatchKey = 0
+	ANY matchKey = 0
 	// HEAD is the pattern for start element of silce.
-	HEAD MatchKey = 1
+	HEAD matchKey = 1
 	// TAIL is the pattern for end element(s) of slice.
-	TAIL MatchKey = 2
+	TAIL matchKey = 2
 )
 
+// MatchItem defines a matched item value.
 type MatchItem struct {
 	value        interface{}
 	valueAsSlice []interface{}
