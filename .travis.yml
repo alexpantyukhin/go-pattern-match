@@ -4,4 +4,5 @@ before_install:
 
 
 script:
+  - go test -race -coverprofile=profile.out -covermode=atomic
   - go test ./... -short
