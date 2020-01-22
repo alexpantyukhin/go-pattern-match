@@ -2,6 +2,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexpantyukhin/go-pattern-match)](https://goreportcard.com/report/github.com/alexpantyukhin/go-pattern-match)
 [![Build Status](https://travis-ci.org/alexpantyukhin/go-pattern-match.svg?branch=master
 )](https://travis-ci.org/alexpantyukhin/go-pattern-match)
+[![codecov](https://codecov.io/gh/alexpantyukhin/go-pattern-match/branch/master/graph/badge.svg)](https://codecov.io/gh/alexpantyukhin/go-pattern-match)
 [![GoDoc](https://godoc.org/alexpantyukhin/go-pattern-match?status.svg)](https://godoc.org/github.com/alexpantyukhin/go-pattern-match)
 [![LICENSE](https://img.shields.io/github/license/alexpantyukhin/go-pattern-match.svg)](https://github.com/alexpantyukhin/go-pattern-match/blob/master/LICENSE)
 
