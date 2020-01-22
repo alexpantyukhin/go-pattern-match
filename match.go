@@ -198,7 +198,7 @@ func matchSlice(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 
 		for i := 0; i < valueSliceLen-patternSliceLen+1; i++ {
 			matchedItems, isMatched := matchSubSlice(patternSliceInterface, valueSlice.Slice(i, valueSliceLen).Interface())
-			resMatchedItems := append([]MatchItem{MatchItem{valueAsSlice: sliceValueToSliceOfInterfaces(valueSlice.Slice(0, i))}}, matchedItems...)
+			resMatchedItems := append([]MatchItem{{valueAsSlice: sliceValueToSliceOfInterfaces(valueSlice.Slice(0, i))}}, matchedItems...)
 			if isMatched {
 				return resMatchedItems, true
 			}

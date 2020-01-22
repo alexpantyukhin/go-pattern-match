@@ -39,11 +39,11 @@ func TestMatch_Fibonacci(t *testing.T) {
 	assert.Equal(t, 21, fib(8))
 }
 
-func TestMatch_MatchWithoutResult(t *testing.T){
+func TestMatch_MatchWithoutResult(t *testing.T) {
 	Match(10).
-	When(10, func() { assert.True(t, true) }).
-	When(ANY, func() { assert.False(t, true) }).
-	Result()
+		When(10, func() { assert.True(t, true) }).
+		When(ANY, func() { assert.False(t, true) }).
+		Result()
 }
 
 func TestMatch_SimpleTypeIntWithFunc(t *testing.T) {
@@ -162,7 +162,7 @@ func TestMatch_SliceWithMatchedItems(t *testing.T) {
 func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
 	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
 		When([]interface{}{HEAD, 2, ANY, 4, TAIL}, func(head MatchItem, any MatchItem, tail MatchItem) [][]interface{} {
-			return [][]interface{}{head.valueAsSlice, []interface{}{any.value}, tail.valueAsSlice}
+			return [][]interface{}{head.valueAsSlice, {any.value}, tail.valueAsSlice}
 		}).
 		Result()
 
