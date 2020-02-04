@@ -383,8 +383,9 @@ func removeValue(vals []reflect.Value, val reflect.Value) []reflect.Value {
 }
 
 func containsValue(vals []reflect.Value, val reflect.Value) bool {
+	valInterface := val.Interface()
 	for _, v := range vals {
-		if val.Interface() == v.Interface() {
+		if valInterface == v.Interface() {
 			return true
 		}
 	}
