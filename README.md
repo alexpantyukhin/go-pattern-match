@@ -1,4 +1,5 @@
 # Go pattern matching
+[![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexpantyukhin/go-pattern-match)](https://goreportcard.com/report/github.com/alexpantyukhin/go-pattern-match)
 [![Build Status](https://travis-ci.org/alexpantyukhin/go-pattern-match.svg?branch=master
 )](https://travis-ci.org/alexpantyukhin/go-pattern-match)
