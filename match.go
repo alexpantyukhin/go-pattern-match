@@ -142,9 +142,15 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
-	if patternKind == reflect.Func && patternType.NumIn() == 1 &&
-		matchStruct(patternType.In(0), value) {
-		return nil, true
+	if patternKind == reflect.Func && patternType.NumIn() == 1 {
+		if patternType.NumOut() == 0 && matchStruct(patternType.In(0), value) {
+			return nil, true
+		}
+
+		if patternType.NumOut() == 1 && patternType.Out(0).Kind() == reflect.Bool {
+			funcRes := reflect.ValueOf(pattern).Call([]reflect.Value{reflect.ValueOf(value)})
+			return nil, funcRes[0].Interface().(bool)
+		}
 	}
 
 	if valueKind == reflect.Map &&

@@ -176,6 +176,39 @@ func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
 	assert.Equal(5, convertedRes[2][0].(int))
 }
 
+func TestMatch_SliceWithMatchedItemsWithLessPatternsParamteresInAction(t *testing.T) {
+	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{HEAD, 2, ANY, 4, TAIL}, func(head MatchItem) [][]interface{} {
+			return [][]interface{}{head.valueAsSlice}
+		}).
+		Result()
+
+	convertedRes := res.([][]interface{})
+
+	assert := assert.New(t)
+
+	assert.True(isMatched)
+	assert.Equal(1, len(convertedRes))
+	assert.Equal(1, convertedRes[0][0].(int))
+}
+
+func TestMatch_SliceWithMatchedItemsWithGreaterPatternsParamteresInAction(t *testing.T) {
+	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{HEAD, 5}, func(head MatchItem, any MatchItem) [][]interface{} {
+			return [][]interface{}{head.valueAsSlice}
+		}).
+		Result()
+
+	convertedRes := res.([][]interface{})
+
+	assert := assert.New(t)
+
+	assert.True(isMatched)
+	assert.Equal(1, len(convertedRes))
+	assert.Equal(1, convertedRes[0][0].(int))
+
+}
+
 func TestMatch_Map(t *testing.T) {
 	isMatched, _ := Match(map[string]int{
 		"rsc": 3711,
@@ -351,6 +384,26 @@ func TestMatch_StructTypeMatch(t *testing.T) {
 		Result()
 
 	assert.True(t, isMatched)
+}
+
+func TestMatch_StructFuncMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(ts TestStruct) bool { return ts.value == 1 }, 1).
+		Result()
+
+	assert.True(t, isMatched)
+}
+
+func TestMatch_StructFuncNotMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(ts TestStruct) bool { return ts.value == 2 }, 1).
+		Result()
+
+	assert.False(t, isMatched)
 }
 
 type AnotherTestStruct struct {
