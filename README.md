@@ -50,6 +50,14 @@ isMatched, _ := Match(val).
     Result()
 ```
 
+```go
+val := TestStruct{1}
+
+isMatched, _ := Match(val).
+	When(func(ts TestStruct) bool { return ts.value == 2 }, 1).
+	Result()
+```
+
 ## With Maps:
 ```go
 isMatched, mr := match.Match(map[string]int{
