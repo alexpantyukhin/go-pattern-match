@@ -353,6 +353,26 @@ func TestMatch_StructTypeMatch(t *testing.T) {
 	assert.True(t, isMatched)
 }
 
+func TestMatch_StructFuncMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(ts TestStruct) bool { return ts.value == 1 }, 1).
+		Result()
+
+	assert.True(t, isMatched)
+}
+
+func TestMatch_StructFuncNotMatch(t *testing.T) {
+	val := TestStruct{1}
+
+	isMatched, _ := Match(val).
+		When(func(ts TestStruct) bool { return ts.value == 2 }, 1).
+		Result()
+
+	assert.False(t, isMatched)
+}
+
 type AnotherTestStruct struct {
 	value int
 }
