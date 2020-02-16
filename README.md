@@ -42,6 +42,7 @@ isMatched, mr := match.Match(42).
 ```
 
 ## With Structs:
+- Simple check value by type
 ```go
 val := TestStruct{1}
 
@@ -50,6 +51,7 @@ isMatched, _ := Match(val).
     Result()
 ```
 
+- Check value by type and condition
 ```go
 val := TestStruct{1}
 
