@@ -56,7 +56,8 @@ isMatched, _ := Match(val).
 val := TestStruct{1}
 
 isMatched, _ := Match(val).
-	When(func(ts TestStruct) bool { return ts.value == 2 }, 1).
+	When(func(ts TestStruct) bool { return ts.value == 42 }, 1).
+	When(func(ts AnotherStruct) bool { return ts.stringValue == "hello" }, 2).
 	Result()
 ```
 
