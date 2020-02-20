@@ -206,7 +206,30 @@ func TestMatch_SliceWithMatchedItemsWithGreaterPatternsParamteresInAction(t *tes
 	assert.True(isMatched)
 	assert.Equal(1, len(convertedRes))
 	assert.Equal(1, convertedRes[0][0].(int))
+}
 
+func TestMatch_SlicePatternAndValueAreEmpty(t *testing.T) {
+	isMatched, _ := Match([]interface{}{}).
+		When([]interface{}{}, true).
+		Result()
+
+	assert.True(t, isMatched)
+}
+
+func TestMatch_SlicePatternEmptyAndValueNotEmpty(t *testing.T) {
+	isMatched, _ := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{}, true).
+		Result()
+
+	assert.False(t, isMatched)
+}
+
+func TestMatch_SlicePatternNotEmptyAndValueEmpty(t *testing.T) {
+	isMatched, _ := Match([]interface{}{}).
+		When([]interface{}{1, 2, 3, 4, 5}, true).
+		Result()
+
+	assert.False(t, isMatched)
 }
 
 func TestMatch_Map(t *testing.T) {
