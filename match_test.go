@@ -159,6 +159,14 @@ func TestMatch_SliceWithMatchedItems(t *testing.T) {
 	assert.Equal(5, convertedRes[1][1].(int))
 }
 
+func TestMatch_SliceNotMatchWithHeadAndWrongPatternLater(t *testing.T) {
+	isMatched, _ := Match([]interface{}{1, 2, 3, 4, 5}).
+		When([]interface{}{HEAD, 10, 11}, true).
+		Result()
+
+	assert.False(t, isMatched)
+}
+
 func TestMatch_SliceWithMatchedItemsWithAny(t *testing.T) {
 	isMatched, res := Match([]interface{}{1, 2, 3, 4, 5}).
 		When([]interface{}{HEAD, 2, ANY, 4, TAIL}, func(head MatchItem, any MatchItem, tail MatchItem) [][]interface{} {
