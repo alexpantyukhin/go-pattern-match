@@ -107,18 +107,9 @@ func (matcher *Matcher) Result() (bool, interface{}) {
 }
 
 func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
-	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
-		reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16,
-		reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
-		reflect.Complex64, reflect.Complex128,
-	}
-
 	if pattern == ANY {
 		return nil, true
 	}
-
-	valueKind := reflect.TypeOf(value).Kind()
-	valueIsSimpleType := containsKind(simpleTypes, valueKind)
 
 	for _, registerMatcher := range registeredMatchers {
 		if registerMatcher(pattern, value) {
@@ -126,10 +117,21 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
+	// Handle the case when value has simple type
+	simpleTypes := []reflect.Kind{reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16,
+		reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16,
+		reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
+		reflect.Complex64, reflect.Complex128,
+	}
+
+	valueKind := reflect.TypeOf(value).Kind()
+	valueIsSimpleType := containsKind(simpleTypes, valueKind)
+
 	if (valueIsSimpleType) && value == pattern {
 		return nil, true
 	}
 
+	// Handle the case when value has slice or array type
 	patternType := reflect.TypeOf(pattern)
 	patternKind := patternType.Kind()
 
@@ -142,6 +144,7 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
+	// Handle the case when pattern has func type for calculating some extra conditions for matching
 	if patternKind == reflect.Func && patternType.NumIn() == 1 {
 		if patternType.NumOut() == 0 && matchStruct(patternType.In(0), value) {
 			return nil, true
@@ -153,6 +156,7 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
+	// Handle the case when value has map type
 	if valueKind == reflect.Map &&
 		patternKind == reflect.Map &&
 		matchMap(pattern, value) {
@@ -160,13 +164,14 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		return nil, true
 	}
 
+	// Handle the case when value has string type
 	if valueKind == reflect.String {
-		if patternKind == reflect.String {
-			if pattern == value {
-				return nil, true
-			}
+		// When pattern is string
+		if patternKind == reflect.String && pattern == value {
+			return nil, true
 		}
 
+		// When pattern is regexp
 		reg, ok := pattern.(*regexp.Regexp)
 		if ok {
 			if matchRegexp(reg, value) {
@@ -175,12 +180,9 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
-	if valueKind == reflect.Struct {
-		if patternKind == reflect.Struct {
-			if value == pattern {
-				return nil, true
-			}
-		}
+	if valueKind == reflect.Struct && patternKind == reflect.Struct && value == pattern
+	{
+		return nil, true
 	}
 
 	return nil, false
