@@ -180,8 +180,7 @@ func matchValue(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		}
 	}
 
-	if valueKind == reflect.Struct && patternKind == reflect.Struct && value == pattern
-	{
+	if valueKind == reflect.Struct && patternKind == reflect.Struct && value == pattern {
 		return nil, true
 	}
 
@@ -231,6 +230,7 @@ func matchSubSlice(pattern interface{}, value interface{}) ([]MatchItem, bool) {
 		if patternSliceLength == valueSliceLength {
 			return nil, true
 		}
+
 		return nil, false
 	}
 
@@ -306,11 +306,7 @@ func matchMap(pattern interface{}, value interface{}) bool {
 		matchedLeftAndRight := false
 
 		for _, vKey := range valueMap.MapKeys() {
-			if !containsValue(stillUsableValueKeys, vKey) {
-				continue
-			}
-
-			if !containsValue(stillUsablePatternKeys, pKey) {
+			if !containsValue(stillUsableValueKeys, vKey) || !containsValue(stillUsablePatternKeys, pKey) {
 				continue
 			}
 
@@ -344,20 +340,17 @@ func matchValueBool(pattern interface{}, value interface{}) bool {
 
 func oneOfContainerPatternMatch(oneOfPattern interface{}, value interface{}) bool {
 	oneOfContainerPatternInstance := oneOfPattern.(oneOfContainer)
-	matched := false
 	for _, item := range oneOfContainerPatternInstance.items {
 		if matchValueBool(item, value) {
-			matched = true
-			break
+			return true
 		}
 	}
 
-	return matched
+	return false
 }
 
 func matchRegexp(regexp *regexp.Regexp, value interface{}) bool {
 	valueStr := value.(string)
-
 	return regexp.MatchString(valueStr)
 }
 
@@ -365,6 +358,7 @@ func min(a, b int) int {
 	if a < b {
 		return a
 	}
+
 	return b
 }
 
@@ -372,6 +366,7 @@ func max(a, b int) int {
 	if a < b {
 		return b
 	}
+
 	return a
 }
 
@@ -397,6 +392,7 @@ func containsValue(vals []reflect.Value, val reflect.Value) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -406,5 +402,6 @@ func containsKind(vals []reflect.Kind, val reflect.Kind) bool {
 			return true
 		}
 	}
+
 	return false
 }
