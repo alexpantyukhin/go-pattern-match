@@ -1,0 +1,18 @@
+name: build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Install dependencies
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: "1.13"
+    - name: "Run and fetch Go data"
+      run: |
+        go get github.com/stretchr/testify
+        go test -race -coverprofile=coverage.txt -covermode=atomic
+
+        go test ./... -short
+        bash <(curl -s https://codecov.io/bash)
